@@ -6,7 +6,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,6 +20,10 @@ import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import retrofit2.Call;
@@ -44,7 +50,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getAllData();
+
+        if(InternetChecker.isInternetAvailable(MainActivity.this)){
+            getAllData();
+        }else {
+// Retrieve the cached JSON string from SharedPreferences
+            SharedPreferences preferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+            String globalSearchData = preferences.getString("globalSearch", null);
+
+            if (globalSearchData != null) {
+                Gson gson = new Gson();
+                Type type = new TypeToken<ArrayList<model>>(){}.getType();
+                ArrayList<model> cachedResponse = gson.fromJson(globalSearchData, type);
+                modelArrayList = cachedResponse;
+            }
+
+        }
 
         staff = findViewById(R.id.staff);
         faculty=findViewById(R.id.faculty);
@@ -168,9 +189,16 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<ArrayList<model>> call,
                                    Response<ArrayList<model>> response) {
                 if (response.isSuccessful()) {
+                   String jsonString = new Gson().toJson(response.body());
+
+                    // Store the JSON string in SharedPreferences
+                    SharedPreferences preferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString("globalSearch", jsonString);
+                    editor.apply();
+
                     modelArrayList = response.body();
                     Log.d("data", modelArrayList.toString());
-                    //Toast.makeText(MainActivity.this, modelArrayList.toString(), Toast.LENGTH_SHORT).show();
                 }
                 p.dismiss();
 

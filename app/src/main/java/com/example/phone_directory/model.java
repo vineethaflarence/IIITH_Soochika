@@ -14,7 +14,7 @@ public class model {
     public String extension;
 
     //public model(String id, String title, String body, String mobile, String emptype, String designation, String department,String location,String extension) {
-    public model(String id, String title, String body, String mobile, String emptype, String designation, String department,String location) {
+    public model() {
         this.id = id;
         this.title = title;
         this.body = body;
@@ -27,6 +27,8 @@ public class model {
         this.toAddress=toAddress;
 
     }
+
+
 
     public String getEmptype() {
         return emptype;
@@ -109,4 +111,6 @@ public class model {
   }
 
   public void setExtension(String extension) {this.extension = extension;}
+
+
 }

@@ -20,6 +20,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -43,10 +45,20 @@ public class GlobalSearchAdapter extends RecyclerView.Adapter<GlobalSearchAdapte
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewHolder holder, int position) {
+        //Get the TextView objects.
+        TextView bodytxt=holder.bodytxt;
+        TextView department= holder.department;
+        if(bodytxt == null ||  department == null){
+            //The TextView objects are not initialized yet.
+            return;
+        }
         model modal = modelArrayList.get(position);
-        holder.bodytxt.setText(modal.getBody());
-        holder.department.setText(modal.getDepartment());
-        holder.email.setText(modal.getEmail());
+        bodytxt.setText(modal.getBody());
+        department.setText(modal.getDepartment());
+
+        //holder.bodytxt.setText(modal.getBody());
+        //holder.department.setText(modal.getDepartment());
+       // holder.email.setText(modal.getEmail());
         holder.initials.setText(String.valueOf(modal.getBody().charAt(0)));
 
 

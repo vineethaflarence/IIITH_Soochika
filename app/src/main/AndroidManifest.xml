@@ -6,6 +6,7 @@
         android:name="android.hardware.telephony"
         android:required="false" />
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CALL_PHONE"></uses-permission>
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -13,9 +14,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/iiitlogo"
+        android:icon="@drawable/logo25"
         android:label="IIITH Soochika"
-        android:roundIcon="@drawable/iiitlogo"
+        android:roundIcon="@drawable/logo25"
         android:supportsRtl="true"
         android:theme="@style/Theme.Phone_Directory"
         tools:targetApi="31">

@@ -1,6 +1,8 @@
 package com.example.phone_directory;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,7 +15,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -62,8 +72,31 @@ public class directory extends AppCompatActivity {
             }
         });
 
-        getAlldata();
+        if(InternetChecker.isInternetAvailable(directory.this)){
+            getAlldata();
+        }else {
+// Retrieve the cached JSON string from SharedPreferences
+            SharedPreferences preferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+            String globalSearchData = preferences.getString( getIntent().getStringExtra("type"), null);
 
+            if (globalSearchData != null) {
+                Gson gson = new Gson();
+                Type type = new TypeToken<ArrayList<model>>(){}.getType();
+                modelArrayList = gson.fromJson(globalSearchData, type);
+
+                recyclerViewAdapter = new RecyclerViewAdapter(modelArrayList, directory.this, getIntent().getStringExtra("type"));
+                // below line is to set layout manager for our recycler view.
+                LinearLayoutManager manager = new LinearLayoutManager(directory.this, RecyclerView.VERTICAL, false);
+                manager.setOrientation(LinearLayoutManager.VERTICAL);
+                // setting layout manager for our recycler view.
+                idRVCourse.setLayoutManager(manager);
+                idRVCourse.setHasFixedSize(true);
+                //below line is to set adapter to our recycler view.
+                idRVCourse.setAdapter(recyclerViewAdapter);
+                recyclerViewAdapter.notifyDataSetChanged();
+            }
+            progressBar.setVisibility(View.GONE);
+        }
 
     }
 
@@ -100,11 +133,18 @@ public class directory extends AppCompatActivity {
                                    Response<ArrayList<model>> response) {
                 if (response.isSuccessful()) {
 
+                    String jsonString = new Gson().toJson(response.body());
+
+                    // Store the JSON string in SharedPreferences
+                    SharedPreferences preferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString(typ, jsonString);
+                    editor.apply();
+
                     // on successful we are hiding our progressbar.
                     progressBar.setVisibility(View.GONE);
-                    // below line is to add our data from api to our array list.
                     modelArrayList = response.body();
-                    // below line we are running a loop to add data to our adapter class.
+
                         recyclerViewAdapter = new RecyclerViewAdapter(modelArrayList, directory.this, typ);
                         // below line is to set layout manager for our recycler view.
                         LinearLayoutManager manager = new LinearLayoutManager(directory.this, RecyclerView.VERTICAL, false);
@@ -116,6 +156,10 @@ public class directory extends AppCompatActivity {
                         idRVCourse.setAdapter(recyclerViewAdapter);
 
 
+                }else {
+
+                    // on failure we are showing a toast message.
+                    Toast.makeText(directory.this, "Fail to get data", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -124,6 +168,9 @@ public class directory extends AppCompatActivity {
             public void onFailure(Call<ArrayList<model>> call, Throwable t) {
                 Toast.makeText(directory.this, "Fail to get data", Toast.LENGTH_SHORT).show();
             }
+
+
+
         });
     }
 }
